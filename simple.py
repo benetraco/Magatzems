@@ -9,7 +9,7 @@ import curses
 from store import *
 
 
-class Strategy: #ERROR! Hi ha algun bucle que no s'acaba
+class Strategy:
     """Implementation of the simple strategy."""
 
     _time: int
@@ -24,14 +24,20 @@ class Strategy: #ERROR! Hi ha algun bucle que no s'acaba
     
     
     def cash(self) -> int:
+        """Returns the store's cash at that moment"""
+
         return self._store.cash()
 
     
     def time(self) -> int:
+        """Returns the time we are at that moment"""
+
         return self._time
 
 
     def update_time(self) -> None:
+        """Updates the time once an action is done"""
+    
         self._time += 1
 
 
@@ -154,10 +160,11 @@ class Strategy: #ERROR! Hi ha algun bucle que no s'acaba
         #we make sure that the with of the store is 20 (if is smaller we cannot apply the simple strategy)
 
         self.add_first_container(c)
-        p = 0
+        p = 0 #we start the algorithm in the first position
+
         #after we do an action we have to stop the algorithm if the next container arrives
         while self._time < c.arrival.end: 
-            
+
             if self._store.empty(): #if the store is empty we don't have to do anything until the next container arrives
                 self._time = c.arrival.end
 
