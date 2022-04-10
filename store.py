@@ -33,9 +33,12 @@ class Container:
     arrival: TimeRange
     delivery: TimeRange
 
-#funcions que es poden afegir: def caducat(self, c: Container) -> bool:
+
 class Store:
     """Class in wich the containers are soted"""
+    _width: int
+    _cash: int
+    _containers_list: list
 
     def __init__(self, width: int):
         """Creates a Store of the given width"""
@@ -43,9 +46,9 @@ class Store:
         assert width >= 0
         self._width = width 
         self._cash = 0
-        self._containers_list: list  = [[] for i in range(self._width)]
-        #els containers els emmagatzerem amb una llista de llistes on l'eix de les x indicarà 
-        #la pila en que es troba el contenidor i el de les y indicarà l'altura a la que es troba.
+        self._containers_list = [[] for i in range(self._width)]
+        #we will store the containers in a list of lists where the X axis is indicates
+        #the stack where the container is and the Y axis the height the container is.
 
 
     def width(self) -> int:
@@ -58,9 +61,9 @@ class Store:
         """Returns the store's height at that moment"""
        
         height = 0
-        for stack in self._containers_list:
-            if len(stack) > height:
-                height = len(stack)
+        for p in self._containers_list:
+            if len(p) > height:
+                height = len(p)
         return height
 
 
@@ -78,18 +81,24 @@ class Store:
 
 
     def add(self, c: Container, p: Position) -> None:
-        """Adds to the list of containers a container c with its position p"""
+        """
+        Adds to the list of containers a container c with its position p
+        Pre: c must be able to be added to p
+        """
         
-        assert self.can_add(c, p)
+        assert self.can_add(c, p) #we make sure c can be added to p
         for i in range(c.size):
             self._containers_list[p + i].append(c)
-        #Afegim tantes copies com mida del contenidor a cada espai que ocupa dins la llista de llistes
+        #We add as many copies as the containers' size in each space it takes up in the list of lists
 
 
     def remove(self, c: Container) -> None:
-        """Deletes from the list of containers the container c if it's possible"""
+        """
+        Deletes from the list of containers the container c
+        Pre: c must be removable
+        """
         
-        assert self.can_remove(c)
+        assert self.can_remove(c) #we make sure c is removable
         location_cont = self.location(c)[1]
         for i in range(c.size):
             self._containers_list[location_cont + i].remove(c) #aquesta funcio remove es la de les llistes (diferent de self.remove())
@@ -97,40 +106,42 @@ class Store:
 
 
     def move(self, c: Container, p: Position) -> None:
-        """Moves a container c to a position p if it's possible"""
+        """
+        Moves a container c to a position p
+        Pre: c must be movable
+        """
         
-        assert self.can_remove(c)
+        assert self.can_move(c, p) #we make sure c is movable
         self.remove(c)
-        assert self.can_add(c, p)
         self.add(c, p)
 
 
     def containers(self) -> List[Container]:
-        """Returns the list of containers that are in the store at that moment"""
+        """Returns the list of the containers that are in the store at that moment"""
         
-        containers_list = []
-        for stack in self._containers_list:
-            for c in stack:
-                if c not in containers_list:
-                    containers_list.append(c)
-        return containers_list
+        cont_lst = []
+        for p in self._containers_list:
+            for c in p:
+                if c not in cont_lst: #we have to make sure that c is not in cont_lst because we added as many copies as the containers' size int the self._containers_list
+                    cont_lst.append(c)
+        return cont_lst
 
 
     def removable_containers(self) -> List[Container]:
         """Returns a list of containers which are removable"""
         
         rem_cont = []
-        for i in range(self._width):
-            cont = self.top_container(i)
-            if cont is not None: #comprovem que a la pila hi ha algun container
+        for p in range(self._width):
+            cont = self.top_container(p)
+            if cont is not None: #we have to make sure that the position is not empty
                 if self.can_remove(cont):
-                    if cont not in rem_cont: #si un container esta a sobra de mes de una pila, nomes afegim una copia seva
+                    if cont not in rem_cont: #if a container is in the top of more than one position (it's size is bigger than one) we only have to add one of it's copies
                         rem_cont.append(cont)
         return rem_cont
 
 
     def top_container(self, p: Position) -> Optional[Container]:
-        """Returns the container of the top of a position p if the position is not empty"""
+        """Returns the container c of the top of a position p if the position is not empty and None if it is"""
         
         if len(self._containers_list[p]) != 0:
             return self._containers_list[p][-1]
@@ -139,23 +150,23 @@ class Store:
 
     #revisar aquesta funcio assert/if/return(-1,-1)
     def location(self, c: Container) -> Location:
-        """Returns the location of a container"""
+        """Returns the location of a container c if it is in the store and (-1, -1) if not"""
 
-        assert self.is_in_store(c)
-        for stack in self._containers_list:
-            if c in stack:
-                return (stack.index(c), self._containers_list.index(stack))
-                #el primer component de la tupla es la posicio del container (dins la pila)
-                #mentre que la segona es la posicio de la pila (dins la llista de llistes)
-        return (-1, -1) #returns -1, -1 if c is not in the store
+        if self.is_in_store(c):
+            for p in self._containers_list:
+                if c in p:
+                    return (p.index(c), self._containers_list.index(p))
+                #the first component of the tuple is the position of the continer (in the stack)
+                #while the second is the position of the stack (in the list of lists)
+        return (-1, -1)
 
 
     def can_add(self, c: Container, p: Position) -> bool:
         """Returns if a container c can be added to a position p"""
 
         height_pila = len(self._containers_list[p])
-        #totes les altures de les piles que hi ha fins a la mida del contenidor a la dreta 
-        #han de ser iguals per poder afegir el contenidor
+        #all the heights of the positions that the continer takes up (it's size) 
+        #in the right of the position must be the same to be able to add the container
         for i in range(1, c.size):
             if height_pila != len(self._containers_list[p + i]):
                 return False
@@ -163,23 +174,34 @@ class Store:
 
 
     def can_remove(self, c: Container) -> bool:
-        """Returns if a contanier c can be removed from its position"""
+        """
+        Returns if a contanier c can be removed from its position
+        Pre: c must be in the store
+        """
 
-        assert self.is_in_store(c)
-        location_cont = self.location(c)[1] #només ens interessa l'eix X (pila) on es troba
+        assert self.is_in_store(c) #we make sure p is in the store
+        p = self.location(c)[1] #we are only interested in the X axis (position) of the container
         for i in range(c.size):
-            if self._containers_list[location_cont + i][-1] != c:
+            if self.top_container(p + i) != c:
                 return False
         return True
 
-    #funcions fetes per mi
+
+    #functions added by myself
+    def can_move(self, c: Container, p: Position) -> bool:
+        """
+        Returns if a container c can be moved to the position p
+        Pre: c must be in the store
+        """
+        assert self.is_in_store(c) #we make sure c is in the store
+        return self.can_remove(c) and self.can_add(c, p)
+
+
     def is_in_store(self, c: Container) -> bool:
         """Returns if a container c is in the store"""
 
-        for stack in self._containers_list:
-            if c in stack:
-                return True
-        return False
+        return c in self.containers()
+    
     
     def empty(self) -> bool:
         """Returns if the store is empty"""
@@ -288,7 +310,7 @@ def check_and_show(containers_path: str, log_path: str, stdscr: Optional[curses.
 
         if what == "CASH":
             cash = int(tokens[2])
-            #assert cash == store.cash()
+            assert cash == store.cash()
 
         elif what == "ADD":
             identifier, position = int(tokens[2]), int(tokens[3])
