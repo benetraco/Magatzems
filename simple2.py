@@ -65,10 +65,10 @@ class Strategy:
                 self._log.remove(self._time, c)
                 self._log.cash(self._time, self._store.cash())
             elif self.can_deliver(c):
-                self._store.add_cash(c.value)
-                self._log.cash(self._time, self._store.cash())
                 self._store.remove(c)
                 self._log.remove(self._time, c)
+                self._store.add_cash(c.value)
+                self._log.cash(self._time, self._store.cash())
             else: #the top container of the stack cannot be delivered neither is expired
                 if next:
                     self._store.move(c, p + c.size)
@@ -79,7 +79,7 @@ class Strategy:
 
     def exec(self, c: Container):
         """Apliquem la excecució simple"""
-        assert self._store.width() <= 20
+        assert self._store.width() >= 20
         self._time = c.arrival.start
         p = self.determine_position(c.size)
         self._store.add(c, p)
