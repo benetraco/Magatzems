@@ -9,6 +9,7 @@ import curses
 from store import *
 
 
+
 class Strategy:
     """Implementation of the simple strategy."""
 
