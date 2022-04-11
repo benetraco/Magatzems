@@ -179,8 +179,8 @@ class Store:
         Pre: c must be in the store
         """
 
-        assert self.is_in_store(c) #we make sure p is in the store
         p = self.location(c)[1] #we are only interested in the X axis (position) of the container
+        assert p != -1 #if p == -1 means that c is not in the store
         for i in range(c.size):
             if self.top_container(p + i) != c:
                 return False
@@ -193,14 +193,17 @@ class Store:
         Returns if a container c can be moved to the position p
         Pre: c must be in the store
         """
-        assert self.is_in_store(c) #we make sure c is in the store
+
         return self.can_remove(c) and self.can_add(c, p)
 
 
     def is_in_store(self, c: Container) -> bool:
         """Returns if a container c is in the store"""
 
-        return c in self.containers()
+        for p in self._containers_list:
+            if c in p:
+                return True
+        return False
     
     
     def empty(self) -> bool:
