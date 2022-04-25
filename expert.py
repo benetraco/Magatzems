@@ -30,7 +30,7 @@ class Strategy:
 
 
     def __init__(self, width: int, log_path: str):
-        self._log = Logger(log_path, "SimpleStrategy", width)
+        self._log = Logger(log_path, "ExpertStrategy", width)
         self._store = Store(width)
         self._time = 0
         self._position = 0
@@ -93,6 +93,16 @@ class Strategy:
         self._store.add(c, p)
         self._log.add(self._time, c, p)
         self.update_time()
+
+    
+    def check_container(self, c: Container) -> None:
+        """Checks if the contanier is deliverable or expired and removes it from the store"""
+        
+        if self.deliverable(c):
+            self.deliverable(c)
+
+        elif self.expired(c):
+            self.remove_expired(c)
 
 
     def expired(self, c: Container) -> bool:
@@ -179,6 +189,7 @@ class Strategy:
         #we make sure that the with of the store is 20 (if is smaller we cannot apply the simple strategy)
 
         self.add_first_container(c)
+        #self.check_container(c)
 
         #after we do an action we have to stop the algorithm if the next container arrives
         while self._time < c.arrival.end: 
