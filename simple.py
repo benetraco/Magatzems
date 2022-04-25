@@ -42,7 +42,7 @@ class Strategy:
         self._time += 1
 
 
-    def det_position_first_container(self, c_size: int) -> int:
+    def det_position_first_container(self, c_size: int) -> Position:
         """Returns the position that has to go the container that arrives 
         to the store based on its size"""
 
@@ -53,7 +53,7 @@ class Strategy:
         else: return 12 #c_size == 4
     
 
-    def det_next_position(self, p: Position) -> int:
+    def det_next_position(self, p: Position) -> Position:
         """Returns the next position in which the program has to 
         operate based on the position it is operating"""
 
